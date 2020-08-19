@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Floor Tiles Generator</title>
+        <style>
+            input {
+                display: block;
+                margin-bottom: 20px;
+            }
+
+            body {
+                display: flex;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <h4>Texture size</h4>
+
+            <div>
+                <label for="width">Width:</label>
+                <input id="width" type="number" name="width" step="1" value="1024" min="1"/>
+
+                <label for="width">Height:</label>
+                <input id="height" type="number" name="height" step="1" value="1024" min="1"/>
+            </div>
+
+            <hr/>
+
+            <h4>Properties</h4>
+
+            <div>
+                <label for="tiles">Tiles:</label>
+                <input id="tiles" type="file" name="tiles" multiple/>
+
+                <label for="rows">Rows count:</label>
+                <input id="rows" type="number" name="rows" step="1" value="6" min="1"/>
+            </div>
+
+            <hr/>
+
+            <button id="run">Build</button>
+        </div>
+
+        <div>
+            <p>Display</p>
+        </div>
+
+        <script lang="javascript" src="./index.js"></script>
+    </body>
+</html>
