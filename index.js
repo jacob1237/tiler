@@ -1,12 +1,13 @@
-(function ()
-{
+(function () {
     const MARGIN_PX = 2;
 
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
 
     const widthInput = document.getElementById('width');
     const heightInput = document.getElementById('height');
+    const rowsInput = document.getElementById('rows');
+    const colsInput = document.getElementById('cols');
     const tiles = document.getElementById('tiles');
 
     /**
@@ -46,10 +47,11 @@
                 ctx.setTransform(1,0,0,1,0,0);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                for (let j = 0; j < 6; j++) {
+                for (let j = 0; j < parseInt(rowsInput.value); j++) {
                     ctx.save();
+                    ctx.translate(-1 * Math.floor(Math.random() * 250), 0);
 
-                    for (let i = 0; i < 3; i++) {
+                    for (let i = 0; i < parseInt(colsInput.value) + 1; i++) {
                         const img = images[Math.floor(Math.random() * images.length)];
     
                         const x = w + MARGIN_PX;
@@ -77,4 +79,3 @@
         });
     }
 )();
- 
