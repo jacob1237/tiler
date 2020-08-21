@@ -1,6 +1,4 @@
 (function () {
-    const MARGIN_PX = 2;
-
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -15,6 +13,11 @@
 
     const tiles = document.getElementById('tiles');
 
+    const offsetInput = document.getElementById('offset');
+    const marginInput = document.getElementById('margin');
+
+    const offsetPatterns = [randOffset, constOffset];
+
     /**
      * Asynchronously read files and return a promise
      *
@@ -22,21 +25,23 @@
      */
     function loadImages(files) {
         return Promise.all(
-            [...files].map((file) => new Promise((resolve, reject) => {
-                const reader = new FileReader();
+            [...files].map((file) => new Promise(
+                (resolve, reject) => {
+                    const reader = new FileReader();
 
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    resolve(img);
-                };
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        resolve(img);
+                    };
 
-                reader.onerror = (e) => {
-                    reject(e);
+                    reader.onerror = (e) => {
+                        reject(e);
+                    }
+
+                    reader.readAsDataURL(file);
                 }
-
-                reader.readAsDataURL(file);
-            }))
+            ))
         );
     }
 
@@ -46,12 +51,13 @@
      * @param {CanvasRenderingContext2D} ctx 
      * @param {Image[]} tiles 
      * @param {number} tileWidth 
-     * @param {number} tileHeight 
+     * @param {number} tileHeight
+     * @param {number} margin
      */
-    function drawRow(ctx, tiles, tileWidth, tileHeight) {
+    function drawRow(ctx, tiles, tileWidth, tileHeight, margin) {
         const img = tiles[Math.floor(Math.random() * tiles.length)];
 
-        const x = tileWidth + MARGIN_PX;
+        const x = tileWidth + margin;
         const cx = tileWidth / 2, cy = tileHeight / 2;
 
         ctx.save();
@@ -68,6 +74,26 @@
     }
 
     /**
+     * Randomized offset pattern generator
+     *
+     * @param {number} row 
+     * @param {number} tileWidth 
+     */
+    function randOffset(row, tileWidth) {
+        return Math.floor(Math.random() * tileWidth);
+    }
+
+    /**
+     * Constant offset pattern generator
+     *
+     * @param {number} row 
+     * @param {number} tileWidth 
+     */
+    function constOffset(row, tileWidth) {
+        return 0;
+    }
+
+    /**
      * Reset canvas context
      *
      * @param {HTMLCanvasElement} canvas 
@@ -81,29 +107,34 @@
     document
         .getElementById('run')
         .addEventListener('click', () => {
-            const tileWidth = 250;
-            const tileHeight = 50;
-
-            const rows = parseInt(rowsInput.value);
-            const cols = parseInt(colsInput.value);
-
-            canvas.width = parseInt(widthInput.value);
-            canvas.height = parseInt(heightInput.value);
-
-            canvasBuf.width = (tileWidth + MARGIN_PX) * cols;
-            canvasBuf.height = tileHeight;
-
             loadImages(tiles.files).then((images) => {
+                const width = parseInt(widthInput.value);
+                const height = parseInt(heightInput.value);
+                const rows = parseInt(rowsInput.value);
+                const cols = parseInt(colsInput.value);
+                const margin = parseInt(marginInput.value);
+                const makeOffset = offsetPatterns[parseInt(offsetInput.value)];
+
+                const tileWidth = (width - (margin * cols)) / cols;
+                const tileHeight = Math.round((height - (margin * rows)) / rows, 2);
+
+                canvas.width = width;
+                canvas.height = height;
+                canvasBuf.width = (tileWidth + margin) * cols;
+                canvasBuf.height = tileHeight;
+
                 clearCanvas(canvas, ctx);
+                ctx.fillStyle = 'grey';
+                ctx.fillRect(0, 0, width, height);
 
                 for (let row = 0; row < rows; row++) {
                     clearCanvas(canvasBuf, ctxBuf);
 
                     for (let col = 0; col < cols; col++) {
-                        drawRow(ctxBuf, images, tileWidth, tileHeight);
+                        drawRow(ctxBuf, images, tileWidth, tileHeight, margin);
                     }
 
-                    const offsetX = Math.floor(Math.random() * tileWidth);
+                    const offsetX = makeOffset(row, tileWidth);
 
                     ctx.save();
                     ctx.translate(offsetX, 0);
@@ -111,7 +142,7 @@
                     ctx.fillRect(-1 * offsetX, 0, canvas.width, canvasBuf.height);
                     ctx.restore();
 
-                    ctx.translate(0, tileHeight + MARGIN_PX);
+                    ctx.translate(0, tileHeight + margin);
                 }
 
                 document.body.appendChild(canvas);
