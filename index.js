@@ -13,7 +13,36 @@
     const offsetInput = document.getElementById('offset');
     const marginInput = document.getElementById('margin');
 
-    const offsetPatterns = [randOffset, constOffset];
+    /*
+     * Tile offset pattern functions:
+     *
+     * 0: random offset
+     * 1: zero offset
+     */
+    const offsetPatterns = [
+        (row, tileWidth) => Math.floor(Math.random() * tileWidth),
+        () => 0,
+    ];
+
+    /**
+     * Memoize arbitrary function
+     *
+     * @param {Function} func
+     * @param {string} separator Custom cache hashmap key separator for function arguments
+     */
+    function memoize(func, separator = ':') {
+        const cache = {};
+
+        return function() {
+            const key = [...arguments].join(separator);
+
+            if (typeof cache[key] === 'undefined') {
+                cache[key] = func(...arguments);
+            }
+
+            return cache[key];
+        };
+    }
 
     /**
      * Asynchronously read files and return a promise
@@ -40,6 +69,16 @@
                 }
             ))
         );
+    }
+
+    /**
+     * Reset canvas context
+     *
+     * @param {CanvasRenderingContext2D} ctx 
+     */
+    function clearCanvas(ctx) {
+        ctx.resetTransform();
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
 
     /**
@@ -87,13 +126,11 @@
         const tileHeight = Math.round((height - (margin * rows)) / rows, 2);
 
         const canvas = ctx.canvas;
-
-        canvas.width = width;
-        canvas.height = height;
-
         const buffer = document.createElement('canvas');
         const bufferCtx = buffer.getContext('2d');
 
+        canvas.width = width;
+        canvas.height = height;
         buffer.width = (tileWidth + margin) * cols;
         buffer.height = tileHeight;
 
@@ -121,36 +158,6 @@
         }
     }
 
-    /**
-     * Randomized offset pattern generator
-     *
-     * @param {number} row 
-     * @param {number} tileWidth 
-     */
-    function randOffset(row, tileWidth) {
-        return Math.floor(Math.random() * tileWidth);
-    }
-
-    /**
-     * Constant offset pattern generator
-     *
-     * @param {number} row 
-     * @param {number} tileWidth 
-     */
-    function constOffset(row, tileWidth) {
-        return 0;
-    }
-
-    /**
-     * Reset canvas context
-     *
-     * @param {CanvasRenderingContext2D} ctx 
-     */
-    function clearCanvas(ctx) {
-        ctx.resetTransform();
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    }
-
     document
         .getElementById('run')
         .addEventListener('click', () => {
@@ -163,7 +170,7 @@
                     parseInt(rowsInput.value),
                     parseInt(marginInput.value),
                     images,
-                    offsetPatterns[parseInt(offsetInput.value)]
+                    memoize(offsetPatterns[parseInt(offsetInput.value)])
                 );
 
                 document.body.appendChild(canvas);
