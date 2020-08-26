@@ -82,7 +82,7 @@
     }
 
     /**
-     * Draw a single row of tiles to the buffer
+     * Draw a single tile to the buffer
      *
      * @param {CanvasRenderingContext2D} ctx 
      * @param {Image[]} tiles 
@@ -90,7 +90,7 @@
      * @param {number} tileHeight
      * @param {number} margin
      */
-    function drawRow(ctx, tiles, tileWidth, tileHeight, margin) {
+    function drawTile(ctx, tiles, tileWidth, tileHeight, margin) {
         const img = tiles[Math.floor(Math.random() * tiles.length)];
 
         const x = tileWidth + margin;
@@ -143,7 +143,7 @@
             clearCanvas(bufferCtx);
 
             for (let col = 0; col < cols; col++) {
-                drawRow(bufferCtx, tiles, tileWidth, tileHeight, margin);
+                drawTile(bufferCtx, tiles, tileWidth, tileHeight, margin);
             }
 
             const offsetX = offsetFunc(row, tileWidth);
