@@ -57,8 +57,8 @@
 
                     reader.onload = (e) => {
                         const img = new Image();
+                        img.onload = () => resolve(img);
                         img.src = e.target.result;
-                        resolve(img);
                     };
 
                     reader.onerror = (e) => {
