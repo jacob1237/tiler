@@ -151,7 +151,7 @@
             ctx.save();
             ctx.translate(offsetX, 0);
             ctx.fillStyle = ctx.createPattern(buffer, 'repeat-x');
-            ctx.fillRect(-1 * offsetX, 0, canvas.width, buffer.height);
+            ctx.fillRect(-offsetX, 0, canvas.width, buffer.height);
             ctx.restore();
 
             ctx.translate(0, tileHeight + margin);
