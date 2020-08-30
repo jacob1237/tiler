@@ -4,25 +4,24 @@ import { clearCanvas } from './helpers/canvas';
  * Draw a single tile to the buffer
  *
  * @param {CanvasRenderingContext2D} ctx 
- * @param {Image[]} tiles 
+ * @param {Image} tile
  * @param {number} tileWidth 
  * @param {number} tileHeight
  * @param {number} margin
+ * @param {number[]} transform Transformation data
  */
-function drawTile(ctx, tiles, tileWidth, tileHeight, margin) {
-    const img = tiles[Math.floor(Math.random() * tiles.length)];
-
+function drawTile(ctx, tile, tileWidth, tileHeight, margin, [ angle, scaleX, scaleY ]) {
     const x = tileWidth + margin;
     const cx = tileWidth / 2, cy = tileHeight / 2;
 
     ctx.save();
 
     ctx.translate(cx, cy);
-    ctx.rotate((Math.PI / 180) * Math.round(Math.random()) * 180);
-    ctx.scale(1, Math.random() < 0.5 ? -1 : 1);
+    ctx.rotate(angle);
+    ctx.scale(scaleX, scaleY);
     ctx.translate(-cx, -cy);
 
-    ctx.drawImage(img, 0, 0, tileWidth, tileHeight);
+    ctx.drawImage(tile, 0, 0, tileWidth, tileHeight);
     ctx.restore();
 
     ctx.translate(x, 0);
@@ -38,9 +37,18 @@ function drawTile(ctx, tiles, tileWidth, tileHeight, margin) {
  * @param {number} rows
  * @param {number} margin
  * @param {Image[]} tiles
- * @param {CallableFunction} offsetFunc
+ * @param {Function} tileFunc
+ * @param {Function} transformFunc
+ * @param {Function} offsetFunc
  */
-export function drawTexture(ctx, width, height, cols, rows, margin, tiles, offsetFunc) {
+export function drawTexture(
+    ctx,
+    { width, height, cols, rows, margin },
+    tiles,
+    tileFunc,
+    transformFunc,
+    offsetFunc
+) {
     const tileWidth = (width - (margin * cols)) / cols;
     const tileHeight = Math.round((height - (margin * rows)) / rows, 2);
 
@@ -62,7 +70,14 @@ export function drawTexture(ctx, width, height, cols, rows, margin, tiles, offse
         clearCanvas(bufferCtx);
 
         for (let col = 0; col < cols; col++) {
-            drawTile(bufferCtx, tiles, tileWidth, tileHeight, margin);
+            drawTile(
+                bufferCtx,
+                tiles[tileFunc(row, col, tiles)],
+                tileWidth,
+                tileHeight,
+                margin,
+                transformFunc(row, col)
+            );
         }
 
         const offsetX = offsetFunc(row, tileWidth);
